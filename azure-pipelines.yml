@@ -5,8 +5,9 @@ pr:
 - develop
 
 pool:
-  vmImage: 'ubuntu-latest'
-
+  name: Default
+  demands:
+  - Agent.OS -equals Darwin
 steps:
 - checkout: self
 

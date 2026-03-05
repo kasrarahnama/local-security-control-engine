@@ -36,6 +36,15 @@ def tiktoken_len(text: str) -> int:
     return len(enc.encode(text))
 
 
+def truncate_to_tokens(text: str, max_tokens: int) -> str:
+    """Safely truncate a string to at most max_tokens using tiktoken."""
+    enc = tiktoken.get_encoding("cl100k_base")
+    ids = enc.encode(text)
+    if len(ids) <= max_tokens:
+        return text
+    return enc.decode(ids[:max_tokens])
+
+
 def infer_metadata(path: Path) -> Dict[str, Any]:
     # ساده و قابل توسعه: از مسیر فایل topic/domain رو حدس می‌زنیم
     parts = [p.lower() for p in path.parts]
@@ -109,6 +118,9 @@ def chunk_docs(docs: List[LoadedDoc], chunk_tokens: int, overlap_tokens: int):
     for d in docs:
         chunks = splitter.split_text(d.text)
         for idx, ch in enumerate(chunks):
+            # Safety: some PDFs produce weirdly long chunks; keep embeds under a hard cap
+            ch = truncate_to_tokens(ch, max_tokens=min(2000, max(256, chunk_tokens)))
+
             md = dict(d.metadata)
             md["chunk_index"] = idx
             md["chunk_tokens_approx"] = tiktoken_len(ch)
@@ -118,7 +130,7 @@ def chunk_docs(docs: List[LoadedDoc], chunk_tokens: int, overlap_tokens: int):
     return texts, metadatas
 
 
-def ingest_to_chroma(texts, metadatas, embedding_model: str, rebuild: bool):
+def ingest_to_chroma(texts, metadatas, embedding_model: str, rebuild: bool, batch_size: int, max_embed_tokens: int):
     PERSIST_DIR.mkdir(parents=True, exist_ok=True)
 
     embeddings = OllamaEmbeddings(model=embedding_model)
@@ -140,8 +152,58 @@ def ingest_to_chroma(texts, metadatas, embedding_model: str, rebuild: bool):
         embedding_function=embeddings,
     )
 
-    db.add_texts(texts=texts, metadatas=metadatas)
-    db.persist()
+    # Ollama embed can fail if any single input exceeds the model context.
+    # We keep batching for speed, but we also guard each item and retry with stronger truncation.
+    total = len(texts)
+    done = 0
+
+    def safe_text(i: int, cap: int) -> str:
+        t = texts[i]
+        # Always enforce a hard cap right before embedding (tokenizers can differ).
+        return truncate_to_tokens(t, max_tokens=cap)
+
+    i = 0
+    while i < total:
+        end = min(i + batch_size, total)
+        batch_texts = [safe_text(j, max_embed_tokens) for j in range(i, end)]
+        batch_metas = metadatas[i:end]
+
+        try:
+            db.add_texts(texts=batch_texts, metadatas=batch_metas)
+            done = end
+            print(f"  - embedded {done}/{total}")
+            i = end
+            continue
+        except Exception as e:
+            msg = str(e).lower()
+            # If context-length error happens, fall back to embedding one-by-one with a smaller cap.
+            if "exceeds the context length" not in msg and "context length" not in msg:
+                raise
+
+        # Fallback: one-by-one with stricter truncation
+        for j in range(i, end):
+            t = safe_text(j, max(128, max_embed_tokens // 2))
+            try:
+                db.add_texts(texts=[t], metadatas=[metadatas[j]])
+                done = j + 1
+                if done % 50 == 0 or done == total:
+                    print(f"  - embedded {done}/{total}")
+            except Exception as e2:
+                # If it still fails, skip and continue (log enough to debug later)
+                print(f"  ! skipped chunk due to embed error: {metadatas[j].get('source_name')} chunk={metadatas[j].get('chunk_index')} err={e2}")
+                done = j + 1
+
+        i = end
+
+    # Persist (LangChain/Chroma versions differ: some expose db.persist(), some persist automatically)
+    if hasattr(db, "persist"):
+        db.persist()  # older langchain wrappers
+    elif hasattr(db, "_client") and hasattr(db._client, "persist"):
+        db._client.persist()  # chromadb client persistence
+    else:
+        # Newer wrappers persist automatically when using persist_directory
+        print("[info] Chroma persistence handled automatically (no persist() method found).")
+
     return db
 
 
@@ -152,6 +214,8 @@ def main():
     ap.add_argument("--embedding_model", type=str, default="nomic-embed-text")
     ap.add_argument("--rebuild", action="store_true")
     ap.add_argument("--dry_run", action="store_true", help="Only load+chunk, no vectorstore write")
+    ap.add_argument("--batch_size", type=int, default=16, help="How many chunks to embed per request")
+    ap.add_argument("--max_embed_tokens", type=int, default=512, help="Hard cap per chunk before embedding (safety vs Ollama context)")
     args = ap.parse_args()
 
     if not CORPUS_DIR.exists():
@@ -174,7 +238,7 @@ def main():
         return
 
     print(f"[3/4] Ingesting into Chroma: {PERSIST_DIR} (collection={COLLECTION_NAME})")
-    ingest_to_chroma(texts, metadatas, args.embedding_model, args.rebuild)
+    ingest_to_chroma(texts, metadatas, args.embedding_model, args.rebuild, args.batch_size, args.max_embed_tokens)
 
     print("[4/4] Done ✅")
 

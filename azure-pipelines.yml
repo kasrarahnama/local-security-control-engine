@@ -7,19 +7,29 @@ pr:
 pool:
   name: Default
   demands:
-  - Agent.OS -equals Darwin
+  - Agent.Name -equals Kasra-MacBook-Pro
+
 steps:
 - checkout: self
 
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '3.11'
-
 - script: |
+    python3 -m venv .venv
+    source .venv/bin/activate
     python -m pip install --upgrade pip
     pip install -r requirements.txt
-  displayName: 'Install dependencies'
+  displayName: "Install dependencies"
 
 - script: |
-    python ingest_corpus.py --dry_run
-  displayName: 'Corpus ingest dry-run (load + chunk + metadata)'
+    source .venv/bin/activate
+    python3 -m pytest tests -v
+  displayName: "Run Phase 5 unit tests"
+
+- script: |
+    source .venv/bin/activate
+    python3 ingest_corpus.py --dry_run
+  displayName: "Corpus ingest dry-run validation"
+
+- script: |
+    source .venv/bin/activate
+    python3 query_corpus.py "least privilege" --k 3 --min_results 1
+  displayName: "Retrieval smoke test"

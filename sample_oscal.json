@@ -1,0 +1,42 @@
+{
+  "system-implementation": {
+    "components": [
+      {
+        "uuid": "comp-1",
+        "title": "Web Application",
+        "type": "application"
+      },
+      {
+        "uuid": "comp-2",
+        "title": "Database",
+        "type": "database"
+      }
+    ],
+    "iam": {
+      "roles": [
+        {
+          "uuid": "role-1",
+          "name": "AppServerRole",
+          "description": "Role used by application server"
+        }
+      ],
+      "users": [
+        {
+          "uuid": "user-1",
+          "name": "SecurityAdmin",
+          "type": "human"
+        }
+      ],
+      "policies": [
+        {
+          "uuid": "policy-1",
+          "name": "LeastPrivilegePolicy",
+          "rules": [
+            "read-only access to audit logs",
+            "deny database deletion"
+          ]
+        }
+      ]
+    }
+  }
+}

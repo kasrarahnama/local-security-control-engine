@@ -1,0 +1,11 @@
+{
+  "artifact_type": "AWS_CONFIG",
+  "description": "Configuration evidence showing encryption at rest",
+  "example_evidence": {
+    "resource_type": "AWS::RDS::DBInstance",
+    "resource_id": "database-1",
+    "storage_encrypted": true,
+    "kms_key_id": "arn:aws:kms:region:account:key/example"
+  },
+  "verification_goal": "Confirm encryption at rest is enabled"
+}

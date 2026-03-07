@@ -1,0 +1,14 @@
+{
+  "artifact_type": "CLOUDTRAIL",
+  "description": "Audit log evidence for security-relevant actions",
+  "example_evidence": {
+    "event_source": "iam.amazonaws.com",
+    "event_name": "CreatePolicy",
+    "timestamp": "2026-01-01T10:15:30Z",
+    "user_identity": "admin-role",
+    "request_parameters": {
+      "policy_name": "ExamplePolicy"
+    }
+  },
+  "verification_goal": "Ensure all access control changes are logged"
+}

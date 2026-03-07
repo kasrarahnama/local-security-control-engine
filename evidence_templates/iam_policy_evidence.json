@@ -1,0 +1,16 @@
+{
+  "artifact_type": "IAM_POLICY",
+  "description": "IAM policy used to enforce access control",
+  "example_evidence": {
+    "policy_name": "ExampleLeastPrivilegePolicy",
+    "attached_to": "role-1",
+    "permissions": [
+      "s3:GetObject",
+      "s3:ListBucket"
+    ],
+    "restricted_resources": [
+      "arn:aws:s3:::secure-bucket/*"
+    ]
+  },
+  "verification_goal": "Confirm access permissions follow least privilege"
+}

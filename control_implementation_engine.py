@@ -8,6 +8,7 @@ from typing import Any, Dict, List
 from langchain_ollama import ChatOllama
 
 from control_context_builder import build_control_contexts
+from shared_responsibility import SHARED_RESPONSIBILITY
 
 
 def build_prompt(context: Dict[str, Any]) -> str:
@@ -49,7 +50,18 @@ The required JSON structure is:
       "chunk_index": 0,
       "topic": "..."
     }}
-  ]
+  ],
+  "verification_steps": [
+    {{
+      "step": "...",
+      "artifact_type": "...",
+      "expected_result": "..."
+    }}
+  ],
+  "shared_responsibility": {{
+    "provider": "...",
+    "customer": "..."
+  }}
 }}
 
 Architecture-aware control context:
@@ -81,6 +93,70 @@ def enforce_binding_ids(
     generated_output["architecture_binding"] = cleaned_binding
     return generated_output
 
+def build_verification_steps(control_id: str) -> list[dict]:
+    if control_id == "LeastPrivilege":
+        return [
+            {
+                "step": "Review IAM policies attached to the referenced roles and confirm permissions are limited to required actions only",
+                "artifact_type": "IAM_POLICY",
+                "expected_result": "No excessive permissions are present",
+            },
+            {
+                "step": "Review SCPs to confirm organization-wide privilege guardrails are enforced",
+                "artifact_type": "SCP",
+                "expected_result": "Privilege escalation paths are restricted",
+            },
+        ]
+
+    if control_id == "AC-2/AC-3":
+        return [
+            {
+                "step": "Review IAM roles, users, and policies for account management and access enforcement",
+                "artifact_type": "IAM_POLICY",
+                "expected_result": "Access is limited to approved identities and actions",
+            },
+            {
+                "step": "Review CloudTrail logs for account and policy change events",
+                "artifact_type": "CLOUDTRAIL",
+                "expected_result": "All account and permission changes are logged",
+            },
+        ]
+
+    if control_id == "AC-4":
+        return [
+            {
+                "step": "Review VPC Flow Logs for the referenced flows and confirm only approved communication paths are present",
+                "artifact_type": "FLOW_LOGS",
+                "expected_result": "Only authorized traffic flows are observed",
+            },
+            {
+                "step": "Review AWS Config rules for network boundary enforcement settings",
+                "artifact_type": "AWS_CONFIG",
+                "expected_result": "Boundary-related configuration is compliant",
+            },
+        ]
+
+    if control_id == "SC-28":
+        return [
+            {
+                "step": "Review AWS Config and storage settings to confirm encryption at rest is enabled",
+                "artifact_type": "AWS_CONFIG",
+                "expected_result": "Referenced storage resources are encrypted at rest",
+            }
+        ]
+
+    if control_id == "SI-10":
+        return [
+            {
+                "step": "Review application logging and CloudTrail-related traces for input validation enforcement",
+                "artifact_type": "CLOUDTRAIL",
+                "expected_result": "Input validation controls are active and auditable",
+            }
+        ]
+
+    return []
+
+
 def generate_control_output(
     context: Dict[str, Any],
     model_name: str = "llama3.1",
@@ -105,6 +181,11 @@ def generate_control_output(
     try:
         validated = validate_control_output(parsed)
         cleaned = enforce_binding_ids(validated.model_dump(), context)
+        cleaned["verification_steps"] = build_verification_steps(cleaned["control_id"])
+        cleaned["shared_responsibility"] = SHARED_RESPONSIBILITY.get(
+            cleaned["control_id"],
+            {"provider": "unknown", "customer": "unknown"},
+        )
         return cleaned
     except ValidationError as e:
         return {

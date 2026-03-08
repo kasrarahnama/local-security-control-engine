@@ -2,7 +2,7 @@
 
 A local AI-assisted security control implementation engine that retrieves security best-practice guidance and generates structured control implementation outputs for cloud architectures.
 
-This project demonstrates how security documentation (e.g., AWS Well-Architected Security Pillar) can be transformed into a searchable knowledge base and used to generate structured implementation guidance for security controls.
+This project demonstrates how security documentation (such as the AWS Well-Architected Security Pillar) can be transformed into a searchable knowledge base and used to generate structured implementation guidance for security controls.
 
 The system runs fully locally and does not rely on external APIs.
 
@@ -60,3 +60,130 @@ Structured Security Control Output
 ---
 
 # Repository Structure
+
+local-control-engine/
+
+corpus/                     Security documentation corpus  
+evidence_templates/         Evidence validation templates  
+tests/                      Unit tests  
+
+ingest_corpus.py            Corpus ingestion pipeline  
+query_corpus.py             Semantic retrieval CLI  
+
+control_implementation_engine.py  
+control_context_builder.py  
+control_query_builder.py  
+control_retriever.py  
+control_runtime_validator.py  
+
+aws_security_baseline.py  
+aws_evidence_collector.py  
+aws_cloudtrail_evidence_collector.py  
+
+architecture_deviation_detector.py  
+enhancement_backlog_builder.py  
+
+azure-pipelines.yml         CI validation pipeline  
+requirements.txt  
+README.md  
+
+---
+
+# Setup
+
+Clone the repository
+
+git clone https://github.com/kasrarahnama/local-security-control-engine.git
+
+cd local-security-control-engine
+
+Install dependencies
+
+pip install -r requirements.txt
+
+---
+
+# Ingest Security Corpus
+
+Before querying the system, the security documentation must be ingested and embedded.
+
+Dry run validation
+
+python ingest_corpus.py --dry_run
+
+Full ingestion
+
+python ingest_corpus.py --rebuild
+
+This process will:
+
+• load documents from the corpus  
+• split them into chunks  
+• generate embeddings  
+• store them in the vector database  
+
+Vector store location
+
+vectorstore/aws_security
+
+---
+
+# Query the Security Corpus
+
+Run semantic search over the corpus.
+
+Example query
+
+python query_corpus.py "least privilege"
+
+JSON output
+
+python query_corpus.py "least privilege" --json
+
+---
+
+# Demo Controls
+
+The repository includes demonstration outputs for several security controls:
+
+AC-4 — Information Flow Enforcement  
+AU-2 — Audit Events  
+SC-7 — Boundary Protection  
+
+Example output file:
+
+demo_controls_output.json
+
+---
+
+# CI Validation
+
+The project includes a CI pipeline using Azure DevOps.
+
+Pipeline checks include:
+
+• dependency installation  
+• corpus ingestion validation  
+• retrieval smoke tests  
+• unit tests  
+
+Defined in:
+
+azure-pipelines.yml
+
+---
+
+# Future Improvements
+
+• Support for additional compliance frameworks (NIST, ITSG-33)  
+• Automated architecture analysis from OSCAL inputs  
+• Integration with security telemetry sources  
+• Enhanced control validation workflows  
+
+---
+
+# Author
+
+Kasra Rahnama Fard
+
+Machine Learning & Security Systems Engineering

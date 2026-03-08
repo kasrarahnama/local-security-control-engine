@@ -1,189 +1,92 @@
 # Local AI Security Control Implementation Engine
 
-A local AI-assisted security control implementation engine that retrieves security best-practice guidance and generates structured control implementation outputs for cloud architectures.
+> A local AI-powered engine for transforming security guidance into structured, architecture-aware control implementation outputs.
 
-This project demonstrates how security documentation (such as the AWS Well-Architected Security Pillar) can be transformed into a searchable knowledge base and used to generate structured implementation guidance for security controls.
-
-The system runs fully locally and does not rely on external APIs.
-
----
-
-# Problem
-
-Security teams often need to translate architecture descriptions into concrete security control implementations.
-
-However:
-
-• Security documentation is large and fragmented  
-• Manual control interpretation is slow  
-• Implementation guidance is inconsistent across teams  
-
-This project explores how a **local retrieval-augmented architecture analysis engine** can assist in generating consistent and structured control implementation guidance.
+<p align="center">
+  <b>Security Corpus Ingestion</b> •
+  <b>Vector Retrieval</b> •
+  <b>Control Guidance</b> •
+  <b>Evidence Validation</b> •
+  <b>Azure DevOps CI</b>
+</p>
 
 ---
 
-# Key Features
+## Overview
 
-• Local semantic retrieval engine for security documentation  
-• Vector database powered by Chroma  
-• Local embedding generation using Ollama  
-• Architecture-aware control context building  
-• Structured control implementation output  
-• Evidence validation model for security controls  
-• CI validation pipeline using Azure DevOps  
-• Demo-ready control outputs (AC-4, AU-2, SC-7)
+Modern security teams often work with large volumes of guidance, reference architectures, control catalogs, and audit requirements.  
+The challenge is not the lack of information — it is turning that information into **clear, consistent, and verifiable control implementation guidance**.
+
+This project is a **local AI-assisted security control implementation engine** that:
+
+- ingests security documentation into a local searchable knowledge base
+- builds embeddings and stores them in a vector database
+- retrieves relevant guidance for a given security topic or control
+- supports structured control implementation outputs
+- defines evidence validation expectations for audit readiness
+- validates the workflow through an Azure DevOps CI pipeline
+
+The system runs **fully locally** and does **not rely on external APIs**.
 
 ---
 
-# System Architecture
+## Why This Project Exists
 
-The pipeline implemented in this project:
+Security guidance is usually:
 
-Corpus Documents  
-↓  
-Text Chunking  
-↓  
-Embedding Generation (Local Model via Ollama)  
-↓  
-Vector Storage (Chroma DB)  
-↓  
-Semantic Retrieval  
-↓  
-Control Context Builder  
-↓  
-Control Implementation Engine  
-↓  
-Evidence Validation Layer  
-↓  
+- long
+- fragmented
+- difficult to operationalize
+- inconsistent across teams
+
+This project explores a more practical approach:
+
+**Security documents → semantic retrieval → implementation guidance → evidence-oriented validation**
+
+Instead of manually searching through documentation every time, the engine allows security knowledge to be retrieved and reused in a more structured and repeatable way.
+
+---
+
+## Core Capabilities
+
+### Local Security Knowledge Retrieval
+Transforms security guidance documents into a vector-searchable knowledge base for semantic retrieval.
+
+### Architecture-Aware Control Context
+Supports the idea of connecting retrieved guidance to control implementation logic and architecture context.
+
+### Evidence Validation Model
+Introduces evidence categories and verification expectations so that controls are not only described, but also tied to operational proof.
+
+### CI Validation Pipeline
+Uses Azure DevOps to automatically validate environment setup, corpus ingestion, retrieval flow, and unit tests.
+
+### Demo-Ready Outputs
+Includes demonstration outputs for security controls such as:
+
+- **AC-4** — Information Flow Enforcement
+- **AU-2** — Audit Events
+- **SC-7** — Boundary Protection
+
+---
+
+## System Flow
+
+```text
+Security Documents
+        ↓
+Text Chunking
+        ↓
+Embedding Generation (Ollama)
+        ↓
+Chroma Vector Store
+        ↓
+Semantic Retrieval
+        ↓
+Control Context Builder
+        ↓
+Control Implementation Engine
+        ↓
+Evidence Validation Layer
+        ↓
 Structured Security Control Output
-
----
-
-# Repository Structure
-
-local-control-engine/
-
-corpus/                     Security documentation corpus  
-evidence_templates/         Evidence validation templates  
-tests/                      Unit tests  
-
-ingest_corpus.py            Corpus ingestion pipeline  
-query_corpus.py             Semantic retrieval CLI  
-
-control_implementation_engine.py  
-control_context_builder.py  
-control_query_builder.py  
-control_retriever.py  
-control_runtime_validator.py  
-
-aws_security_baseline.py  
-aws_evidence_collector.py  
-aws_cloudtrail_evidence_collector.py  
-
-architecture_deviation_detector.py  
-enhancement_backlog_builder.py  
-
-azure-pipelines.yml         CI validation pipeline  
-requirements.txt  
-README.md  
-
----
-
-# Setup
-
-Clone the repository
-
-git clone https://github.com/kasrarahnama/local-security-control-engine.git
-
-cd local-security-control-engine
-
-Install dependencies
-
-pip install -r requirements.txt
-
----
-
-# Ingest Security Corpus
-
-Before querying the system, the security documentation must be ingested and embedded.
-
-Dry run validation
-
-python ingest_corpus.py --dry_run
-
-Full ingestion
-
-python ingest_corpus.py --rebuild
-
-This process will:
-
-• load documents from the corpus  
-• split them into chunks  
-• generate embeddings  
-• store them in the vector database  
-
-Vector store location
-
-vectorstore/aws_security
-
----
-
-# Query the Security Corpus
-
-Run semantic search over the corpus.
-
-Example query
-
-python query_corpus.py "least privilege"
-
-JSON output
-
-python query_corpus.py "least privilege" --json
-
----
-
-# Demo Controls
-
-The repository includes demonstration outputs for several security controls:
-
-AC-4 — Information Flow Enforcement  
-AU-2 — Audit Events  
-SC-7 — Boundary Protection  
-
-Example output file:
-
-demo_controls_output.json
-
----
-
-# CI Validation
-
-The project includes a CI pipeline using Azure DevOps.
-
-Pipeline checks include:
-
-• dependency installation  
-• corpus ingestion validation  
-• retrieval smoke tests  
-• unit tests  
-
-Defined in:
-
-azure-pipelines.yml
-
----
-
-# Future Improvements
-
-• Support for additional compliance frameworks (NIST, ITSG-33)  
-• Automated architecture analysis from OSCAL inputs  
-• Integration with security telemetry sources  
-• Enhanced control validation workflows  
-
----
-
-# Author
-
-Kasra Rahnama Fard
-
-Machine Learning & Security Systems Engineering

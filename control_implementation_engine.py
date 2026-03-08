@@ -1,6 +1,10 @@
 from __future__ import annotations
 from pydantic import ValidationError
 from control_output_schema import validate_control_output
+from architecture_deviation_detector import (
+    build_summary_from_oscal,
+    detect_architecture_alignment,
+)
 
 import json
 from typing import Any, Dict, List
@@ -202,9 +206,12 @@ def generate_all_control_outputs(
 ) -> List[Dict[str, Any]]:
     contexts = build_control_contexts(oscal_path)
     results: List[Dict[str, Any]] = []
+    architecture_summary = build_summary_from_oscal(oscal_path)
+    deviation_result = detect_architecture_alignment(architecture_summary)
 
     for context in contexts:
         output = generate_control_output(context, model_name=model_name)
+        output["architectural_deviations"] = deviation_result.get("deviations", [])
         results.append(output)
 
     return results

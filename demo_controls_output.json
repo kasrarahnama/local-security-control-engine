@@ -1,0 +1,171 @@
+[
+  {
+    "control_id": "AC-4",
+    "control_name": "Information Flow Enforcement",
+    "reason": "Demo control added for final validation coverage",
+    "architecture_binding": {
+      "components": [],
+      "roles": [],
+      "users": [],
+      "policies": [],
+      "flows": []
+    },
+    "implementation_guidance": [
+      "Use IAM policy validation to ensure that your policies are valid and do not grant new access.",
+      "Use IAM custom policy checks to validate your policies against your specified security standards.",
+      "Route or zone data within specific security environments as required by your application."
+    ],
+    "evidence_sources": [
+      {
+        "source_name": "security-pillar.pdf",
+        "chunk_index": 131,
+        "topic": "aws-well-architected"
+      },
+      {
+        "source_name": "aws-security-reference-architecture.pdf",
+        "chunk_index": 76,
+        "topic": "aws-sra"
+      },
+      {
+        "source_name": "security-pillar.pdf",
+        "chunk_index": 8,
+        "topic": "aws-well-architected"
+      }
+    ],
+    "verification_steps": [
+      {
+        "step": "Review VPC Flow Logs for the referenced flows and confirm only approved communication paths are present",
+        "artifact_type": "FLOW_LOGS",
+        "expected_result": "Only authorized traffic flows are observed"
+      },
+      {
+        "step": "Review AWS Config rules for network boundary enforcement settings",
+        "artifact_type": "AWS_CONFIG",
+        "expected_result": "Boundary-related configuration is compliant"
+      }
+    ],
+    "shared_responsibility": {
+      "provider": "unknown",
+      "customer": "unknown"
+    },
+    "architectural_deviations": [
+      {
+        "category": "multi_account",
+        "status": "deviation",
+        "message": "Missing expected account components: ['security', 'logging', 'workload']",
+        "enhancement_opportunity": "Adopt a multi-account structure with dedicated security, logging, and workload accounts"
+      },
+      {
+        "category": "centralized_logging",
+        "status": "deviation",
+        "message": "No dedicated logging component/account detected for centralized logging",
+        "enhancement_opportunity": "Introduce a dedicated logging account or component to centralize CloudTrail and Flow Log collection"
+      }
+    ]
+  },
+  {
+    "control_id": "AU-2",
+    "control_name": "Audit Events",
+    "reason": "Demo control added for final validation coverage",
+    "architecture_binding": {
+      "components": [],
+      "roles": [],
+      "users": [],
+      "policies": [],
+      "flows": []
+    },
+    "implementation_guidance": [
+      "Use IAM policy validation to check policies against IAM policy grammar and AWS best practices.",
+      "Use IAM custom policy checks to validate policies against your specified security standards.",
+      "Implement OAuth 2.0 and OpenID Connect (OIDC) for controlling access to services by users and service-to-service traffic.",
+      "Use API Gateway to restrict access to API routes using JSON Web Tokens (JWTs) issued from OIDC or OAuth 2.0 identity providers."
+    ],
+    "evidence_sources": [
+      {
+        "source_name": "aws-security-reference-architecture.pdf",
+        "chunk_index": 76,
+        "topic": "aws-sra"
+      },
+      {
+        "source_name": "security-pillar.pdf",
+        "chunk_index": 181,
+        "topic": "aws-well-architected"
+      },
+      {
+        "source_name": "CHANGELOG.md",
+        "chunk_index": 9,
+        "topic": "aws-sra-examples"
+      }
+    ],
+    "verification_steps": [],
+    "shared_responsibility": {
+      "provider": "unknown",
+      "customer": "unknown"
+    },
+    "architectural_deviations": [
+      {
+        "category": "multi_account",
+        "status": "deviation",
+        "message": "Missing expected account components: ['security', 'logging', 'workload']",
+        "enhancement_opportunity": "Adopt a multi-account structure with dedicated security, logging, and workload accounts"
+      },
+      {
+        "category": "centralized_logging",
+        "status": "deviation",
+        "message": "No dedicated logging component/account detected for centralized logging",
+        "enhancement_opportunity": "Introduce a dedicated logging account or component to centralize CloudTrail and Flow Log collection"
+      }
+    ]
+  },
+  {
+    "control_id": "SC-7",
+    "control_name": "Boundary Protection",
+    "reason": "Demo control added for final validation coverage",
+    "architecture_binding": {
+      "components": [],
+      "roles": [],
+      "users": [],
+      "policies": [],
+      "flows": []
+    },
+    "implementation_guidance": [
+      "Default: 7\n    Description: Frequency (in days between 1 and 30, default is 7) to check organizational compliance by invoking the Lambda Function.\n    MinValue: 1\n    MaxValue: 30\n    Type: Number\n  pControlTowerLifeCycleRuleName:\n    AllowedPattern: '^[\\w.-]{1,64}$'\n    ConstraintDescription: Max 64 alphanumeric and underscore characters. Also special characters supported [., -]\n    Default: sra-shield-advanced-trigger\n    Description: The name of the AWS Control Tower Life Cycle Rule.\n    Type: String\n  pControlTowerRegionsOnly:\n    AllowedValues: ['true', 'false']\n    Default: 'true'\n    Description: Only enable in the Control Tower governed regions (set to true for environments without AWS Control Tower)\n    Type: String\n  pCreateLambdaLogGroup:\n    AllowedValues: ['true', 'false']\n    Default: 'false'\n    Description:\n      Indicates whether a CloudWatch Log Group should be explicitly created for the Lambda function, to allow for setting a Log Retention and/or KMS\n      Key for encryption.\n    Type: String\n  pEnabledRegions:\n    AllowedPattern: '^$|^([a"
+    ],
+    "evidence_sources": [
+      {
+        "source_name": "sra-shield-advanced-configuration.yaml",
+        "chunk_index": 6,
+        "topic": "aws-sra-examples"
+      },
+      {
+        "source_name": "aws-security-reference-architecture.pdf",
+        "chunk_index": 76,
+        "topic": "aws-sra"
+      },
+      {
+        "source_name": "sra-securityhub-org-configuration.yaml",
+        "chunk_index": 2,
+        "topic": "aws-sra-examples"
+      }
+    ],
+    "verification_steps": [],
+    "shared_responsibility": {
+      "provider": "unknown",
+      "customer": "unknown"
+    },
+    "architectural_deviations": [
+      {
+        "category": "multi_account",
+        "status": "deviation",
+        "message": "Missing expected account components: ['security', 'logging', 'workload']",
+        "enhancement_opportunity": "Adopt a multi-account structure with dedicated security, logging, and workload accounts"
+      },
+      {
+        "category": "centralized_logging",
+        "status": "deviation",
+        "message": "No dedicated logging component/account detected for centralized logging",
+        "enhancement_opportunity": "Introduce a dedicated logging account or component to centralize CloudTrail and Flow Log collection"
+      }
+    ]
+  }
+]
